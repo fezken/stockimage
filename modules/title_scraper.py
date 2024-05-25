@@ -11,7 +11,7 @@ class TitleScraper(NetworkModule):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def get_adobe_stock_titles(self, session: aiohttp.ClientSession, keyword: str, page: int, sort: str, category: str, generative_ai: bool) -> List[Tuple[int, str, int, int, str, str]]:
+    def construct_url(self, keyword: str, page: int, sort: str, category: str, generative_ai: bool) -> str:
         base_url = f"{self.base_url}?filters%5Bcontent_type%3Aimage%5D=1&k={keyword}&order={sort}&safe_search=1&search_page={page}&get_facets=0"
         if category == 'photos':
             url = base_url + "&filters%5Bcontent_type%3Aphoto%5D=1&filters%5Bcontent_type%3Aillustration%5D=0"
@@ -22,7 +22,10 @@ class TitleScraper(NetworkModule):
         
         if generative_ai:
             url += "&filters%5Bgentech%5D=only"
+        return url
 
+    async def get_adobe_stock_titles(self, session: aiohttp.ClientSession, keyword: str, page: int, sort: str, category: str, generative_ai: bool) -> List[Tuple[int, str, int, int, str, str]]:
+        url = self.construct_url(keyword, page, sort, category, generative_ai)
         response_text = await self.fetch(session, url)
         timestamp = int(datetime.now().timestamp())
         
@@ -64,13 +67,9 @@ class TitleScraper(NetworkModule):
         else:
             pages = [int(pages_string)]
         
-        print(f"Scraping titles for keywords: {keywords}, pages: {pages}, sort: {sort}, category: {category}, generative AI: {generative_ai}")
-        
         titles = asyncio.run(self.scrape_titles(keywords, pages, sort, category, generative_ai))
         headers = ['Timestamp', 'Keyword', 'Page', 'Result Number', 'Title', 'Category']
         filename = 'titles.csv' if not generative_ai else 'titles_generative_ai.csv'
         FileUtils.save_results_to_csv(titles, headers, filename)
-        
-        print(f"Titles scraped: {titles}")
         
         return "CSV file updated with titles."

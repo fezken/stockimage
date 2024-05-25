@@ -12,7 +12,7 @@ class KeywordChecker(NetworkModule):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def get_adobe_stock_results(self, session: aiohttp.ClientSession, keyword: str, category: str, generative_ai: bool) -> Tuple[int, str, str, str]:
+    def construct_url(self, keyword: str, category: str, generative_ai: bool) -> str:
         base_url = f"{self.base_url}?filters%5Bcontent_type%3Aimage%5D=1&k={keyword}&safe_search=1"
         if category == 'photos':
             url = base_url + "&filters%5Bcontent_type%3Aphoto%5D=1&filters%5Bcontent_type%3Aillustration%5D=0"
@@ -23,7 +23,10 @@ class KeywordChecker(NetworkModule):
         
         if generative_ai:
             url += "&filters%5Bgentech%5D=only"
+        return url
 
+    async def get_adobe_stock_results(self, session: aiohttp.ClientSession, keyword: str, category: str, generative_ai: bool) -> Tuple[int, str, str, str]:
+        url = self.construct_url(keyword, category, generative_ai)
         response_text = await self.fetch(session, url)
         timestamp = int(datetime.now().timestamp())
 
@@ -60,7 +63,7 @@ class KeywordChecker(NetworkModule):
                     tasks.append(self.get_adobe_stock_results(session, keyword, 'illustrations', generative_ai))
                 else:
                     tasks.append(self.get_adobe_stock_results(session, keyword, category, generative_ai))
-            results = await asyncio.gather(*tasks)
+            results = await self.process_tasks(tasks)
             return results
 
     def check_keywords(self, keywords_string: str, category: str = 'both', generative_ai: bool = False) -> str:
