@@ -49,6 +49,27 @@
                 <button onclick="scrapeTitles()">Scrape Titles</button>
             </div>
         </div>
+        <div class="card" id="analysis-card">
+            <h2>Analysis</h2>
+            <div class="content">
+                <h3>Perform Analysis</h3>
+                <label for="analysis-method">Choose Analysis Method:</label>
+                <select id="analysis-method">
+                    <option value="lowest">Lowest Number of Search Results</option>
+                    <option value="highest">Highest Number of Search Results</option>
+                    <option value="recent">Most Recent Keywords</option>
+                    <option value="trending">Trending Keywords</option>
+                    <option value="popularity">Keyword Popularity</option>
+                </select>
+                <label for="analysis-count">Number of Keywords:</label>
+                <input type="number" id="analysis-count" value="20">
+                <button onclick="performAnalysis()">Perform Analysis</button>
+                <button onclick="automateProcess()">Automate Process</button>
+            </div>
+        </div>
+        
+        
+        
         <!-- Add more cards as needed -->
     </div>
 

@@ -12,7 +12,7 @@ class KeywordChecker(NetworkModule):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    def construct_url(self, keyword: str, category: str, generative_ai: bool) -> str:
+    async def get_adobe_stock_results(self, session: aiohttp.ClientSession, keyword: str, category: str, generative_ai: bool) -> Tuple[int, str, Union[int, str], str]:
         base_url = f"{self.base_url}?filters%5Bcontent_type%3Aimage%5D=1&k={keyword}&safe_search=1"
         if category == 'photos':
             url = base_url + "&filters%5Bcontent_type%3Aphoto%5D=1&filters%5Bcontent_type%3Aillustration%5D=0"
@@ -23,10 +23,7 @@ class KeywordChecker(NetworkModule):
         
         if generative_ai:
             url += "&filters%5Bgentech%5D=only"
-        return url
 
-    async def get_adobe_stock_results(self, session: aiohttp.ClientSession, keyword: str, category: str, generative_ai: bool) -> Tuple[int, str, str, str]:
-        url = self.construct_url(keyword, category, generative_ai)
         response_text = await self.fetch(session, url)
         timestamp = int(datetime.now().timestamp())
 
@@ -43,7 +40,7 @@ class KeywordChecker(NetworkModule):
                     result_text = strong_tag.get_text()
                     match = re.search(r'(\d[\d\s]*)', result_text)
                     if match:
-                        number_of_results = re.sub(r'\s+', '', match.group(1))  # Remove all whitespace
+                        number_of_results = int(re.sub(r'\s+', '', match.group(1)))  # Remove all whitespace
                         return timestamp, keyword, number_of_results, category
                     else:
                         return timestamp, keyword, "Number not found in the text.", category
@@ -54,7 +51,7 @@ class KeywordChecker(NetworkModule):
         else:
             return timestamp, keyword, "Outer span not found.", category
 
-    async def process_keywords(self, keywords: List[str], category: str, generative_ai: bool) -> List[Tuple[int, str, str, str]]:
+    async def process_keywords(self, keywords: List[str], category: str, generative_ai: bool) -> List[Tuple[int, str, Union[int, str], str]]:
         async with aiohttp.ClientSession() as session:
             tasks = []
             for keyword in keywords:

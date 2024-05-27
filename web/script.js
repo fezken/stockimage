@@ -148,3 +148,20 @@ document.getElementById('keywords').addEventListener('input', handleInput);
 function toggleExpand(isChecked) {
     expandTextField = isChecked;
 }
+
+
+async function performAnalysis() {
+    showNotification('Performing analysis...');
+    let method = document.getElementById('analysis-method').value;
+    let count = document.getElementById('analysis-count').value;
+    let result = await eel.perform_analysis(method, parseInt(count))();
+    showNotification(result);
+}
+
+async function automateProcess() {
+    showNotification('Automating process...');
+    let keywords = document.getElementById('keywords').value;
+    let category = document.querySelector('input[name="category"]:checked').value;
+    let result = await eel.automate_process(keywords, category)();
+    showNotification(result);
+}
