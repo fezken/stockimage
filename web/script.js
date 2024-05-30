@@ -165,3 +165,11 @@ async function automateProcess() {
     let result = await eel.automate_process(keywords, category)();
     showNotification(result);
 }
+
+async function scrapeTitlesByCreator() {
+    showNotification('Scraping titles by creator...');
+    let creatorIds = document.getElementById('creator-ids').value;
+    let pages = document.getElementById('creator-pages').value;
+    let result = await eel.scrape_titles_by_creator(creatorIds, pages)();
+    showNotification(result);
+}

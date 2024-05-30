@@ -19,6 +19,11 @@ def scrape_titles(keywords: str, pages: str, sort: str = "nb_downloads", categor
     return result
 
 @eel.expose
+def scrape_titles_by_creator(creator_ids: str, pages: str) -> str:
+    result = title_scraper.scrape_titles_by_creator_to_csv(creator_ids, pages)
+    return result
+
+@eel.expose
 def perform_analysis(method: str, count: int = 20) -> str:
     result = analysis_module.perform_analysis(method, count)
     return result
